@@ -1,6 +1,7 @@
 enron_mail_20110402/
 zincs/
 comprimidos/
+test.py
 
 .env
 .test
