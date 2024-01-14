@@ -1,108 +1,117 @@
 // // pkg/handler/query
-// // funtion to perfom the query
 package handler
 
+import (
+	"fmt"
+	"os"
+	"time"
+	"back_go/pkg/zincsearch"
+	"encoding/json"
+	"net/http"
+	// "log"
+	// "io/ioutil"
+	"bytes"
+	"strings"
+)
 
-// func performSearch(host string, query SearchRequest) (*Hits, error) {
-// 	url := host + "/your_search_endpoint" // Reemplaza esto con la verdadera URL de búsqueda
+var max_results = 100
+var search_type = "match"
 
-// 	jsonData, err := json.Marshal(query)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+type Email struct {
+    From    string `json:"from"`
+    To      string `json:"to"`
+    Subject string `json:"subject"`
+    Content string `json:"content"`
+    FullFile    string `json:"full_file"`
+}
 
-// 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
-// 	if err != nil {
-// 		return nil, err
-// 	}
+func parseEmail(emailText string) (*Email, error) {
+    email := &Email{}
 
-// 	req.Header.Set("Content-Type", "application/json")
+    lines := strings.Split(emailText, "\n")
+    var bodyStarted bool
 
-// 	client := &http.Client{}
-// 	resp, err := client.Do(req)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer resp.Body.Close()
+    for _, line := range lines {
+        if strings.HasPrefix(line, "From:") && email.From == "" {
+            email.From = strings.TrimSpace(strings.TrimPrefix(line, "From:"))
+        } else if strings.HasPrefix(line, "To:") && email.To == "" {
+            email.To = strings.TrimSpace(strings.TrimPrefix(line, "To:"))
+        } else if strings.HasPrefix(line, "Subject:") && email.Subject == "" {
+            email.Subject = strings.TrimSpace(strings.TrimPrefix(line, "Subject:"))
+        } else if line == "" && !bodyStarted {
+            bodyStarted = true
+        } else if bodyStarted {
+            email.Content += line + "\n"
+        }
+		email.FullFile += line + "\n"
+    }
 
-// 	body, err := ioutil.ReadAll(resp.Body)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+    return email, nil
+}
 
-// 	var result map[string]interface{}
-// 	if err := json.Unmarshal(body, &result); err != nil {
-// 		return nil, err
-// 	}
+// Construct the request and perform the petition
+func SearchDocuments(query string) ([]Email, error) {
+	fmt.Println(query)
+	LoadEnv()
+	url := os.Getenv("ZINC_HOST") + ":" + os.Getenv("ZINC_PORT") + "/api/" + index + "/_search"
 
-// 	hitsData, ok := result["hits"].(map[string]interface{})
-// 	if !ok {
-// 		return nil, fmt.Errorf("No se pudo acceder al campo 'hits'")
-// 	}
+	now := time.Now()
 
-// 	// Acceder al campo "hits" dentro de "hits"
-// 	hitsArray, ok := hitsData["hits"].([]interface{})
-// 	if !ok {
-// 		return nil, fmt.Errorf("No se pudo acceder al campo 'hits'")
-// 	}
+	// Implementa la función para filtrar por tiempo --------------
+	startTime := now.AddDate(0, -7, -7).Format("2006-01-02T15:04:05Z")
+	endTime := now.Format("2006-01-02T15:04:05Z")
 
-// 	var contenidos []string
+	request := zincsearch.SearchDocumentsRequest{
+		SearchType: search_type,
+		MaxResults: max_results,
+		Query: zincsearch.SearchDocumentsRequestQuery{
+			Term:      query,
+			StartTime: startTime,
+			EndTime:   endTime,
+		},
+	}
 
-// 	// Recorrer el arreglo de hits
-// 	for _, hit := range hitsArray {
-// 		hitMap, ok := hit.(map[string]interface{})
-// 		if !ok {
-// 			fmt.Println("No se pudo convertir el hit a mapa")
-// 			continue
-// 		}
+	jsonData, err := json.MarshalIndent(request, "", "   ")
+	if err != nil {
+		return nil, fmt.Errorf("Error al convertir a JSON: %v", err)
+	}
 
-// 		// Acceder al campo "_source"
-// 		source, ok := hitMap["_source"].(map[string]interface{})
-// 		if !ok {
-// 			fmt.Println("No se pudo acceder al campo '_source'")
-// 			continue
-// 		}
-		
-// 		// Acceder al campo "contenido"
-// 		contenido, ok := source["contenido"].(string)
-// 		if !ok {
-// 			fmt.Println("No se pudo acceder al campo 'contenido'")
-// 			continue
-// 		}
-		
-// 		// Hacer algo con el campo "contenido", por ejemplo, imprimirlo
-// 		contenidos = append(contenidos, contenido)
-// 	}
+	fmt.Println(string(jsonData))
 	
-// 	// fmt.Println("Contenidos", contenidos)
-// 	return &contenidos, nil
-// }
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, fmt.Errorf("Error al leer la solicitud: %v", err)
+	}
+	
+	req.SetBasicAuth(os.Getenv("ZINC_ADMIN_USER"), os.Getenv("ZINC_ADMIN_PASSWORD"))
+	req.Header.Set("Content-Type", "application/json")
+	
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("Error al realizar la solicitud HTTP: %v", err)
+	}
+	
+	defer resp.Body.Close()
+	
+	var searchResponse zincsearch.SearchDocumentsResponse
+	fmt.Println(searchResponse)
+	err = json.NewDecoder(resp.Body).Decode(&searchResponse)
+	if err != nil {
+		return nil, fmt.Errorf("Error al decodificar la respuesta JSON: %v", err)
+	}
 
-// func main() {
-// 	host := "http://localhost:4080" // Reemplaza esto con tu verdadero host
-// 	query := SearchRequest{
-// 		SearchType: "match",
-// 		Query: Query{
-// 			Term:      "value",
-// 			StartTime: "2023-01-01T14:30:00Z",
-// 			EndTime:   "2024-01-07T14:30:00Z",
-// 		},
-// 		MaxResults: 5,
-// 	}
+	var result []Email
 
-// 	result, err := performSearch(host, query)
-// 	if err != nil {
-// 		fmt.Println("Error al realizar la búsqueda:", err)
-// 		return
-// 	}
-// 	fmt.Println(string(result))
+	for _, value := range searchResponse.Hits.Hits {
+		parsedEmail, err := parseEmail(fmt.Sprint(value.Source["contenido"]))
+		if err != nil {
+			// Manejar el error de parseo de alguna manera si es necesario
+			fmt.Printf("Error al analizar el correo: %v\n", err)
+			continue // Omitir este correo y continuar con el siguiente
+		}
+		result = append(result, *parsedEmail) // Agregar el Email al slice result
+	}
 
-// 	// Imprime el resultado
-// 	// resultJSON, err := json.MarshalIndent(result, "", "   ")
-// 	// if err != nil {
-// 	// 	fmt.Println("Error al formatear el resultado en JSON:", err)
-// 	// 	return
-// 	// }
-
-// 	// fmt.Println(string(resultJSON))
-// }
+	return result, nil
+}

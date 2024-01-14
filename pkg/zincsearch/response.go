@@ -23,4 +23,5 @@ type SearchDocumentsResponse struct {
 	} `json:"hits"`
 	TimedOut bool    `json:"timed_out"`
 	Took     float64 `json:"took"`
+	// Shards     map[string]interface{} `json:"_shards"`
 }

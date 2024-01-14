@@ -10,11 +10,8 @@ type CreateDocumentsRequest struct {
 // SearchDocumentsRequest is the request for the SearchDocuments function
 type SearchDocumentsRequest struct {
 	SearchType string                      `json:"search_type"`
-	SortFields []string                    `json:"sort_fields"`
-	From       int                         `json:"from"`
 	MaxResults int                         `json:"max_results"`
 	Query      SearchDocumentsRequestQuery `json:"query"`
-	Source     map[string]interface{}      `json:"_source"`
 }
 
 // SearchDocumentsRequestQuery is the query for the SearchDocuments function

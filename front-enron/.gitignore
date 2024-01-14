@@ -1,16 +1,7 @@
-enron_mail_20110402/
-zincs/
-comprimidos/
 .DS_Store
 node_modules
 /dist
 
-package-lock.json
-test.py
-
-.env
-.test
-.prof
 
 # local env files
 .env.local
