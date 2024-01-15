@@ -1,4 +1,3 @@
-// pk/zincsearch/response
 package zincsearch
 
 // CreateDocumentsResponse is the response for the CreateDocuments function
@@ -23,5 +22,5 @@ type SearchDocumentsResponse struct {
 	} `json:"hits"`
 	TimedOut bool    `json:"timed_out"`
 	Took     float64 `json:"took"`
-	// Shards     map[string]interface{} `json:"_shards"`
+	Shards     map[string]interface{} `json:"_shards"`
 }

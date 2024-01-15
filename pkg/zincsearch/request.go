@@ -1,4 +1,3 @@
-// pk/zincsearch/request
 package zincsearch
 
 // CreateDocumentsRequest is the request for the CreateDocuments function

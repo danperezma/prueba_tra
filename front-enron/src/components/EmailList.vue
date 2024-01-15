@@ -1,12 +1,12 @@
 <template>
   <div class="email-list-container">
-    <table class="table-auto w-full">
+    <table class="table w-full">
       <thead>
         <tr>
-          <th class="border px-4 py-2 bg-gray-900 text-blue-300">From</th>
-          <th class="border px-4 py-2 bg-gray-900 text-blue-300">To</th>
-          <th class="border px-4 py-2 bg-gray-900 text-blue-300">Subject</th>
-          <th class="border px-4 py-2 bg-gray-900 text-blue-300">Content</th>
+          <th class="w-1/8 border px-4 py-2 bg-gray-900 text-blue-300">From</th>
+          <th class="w-1/8 border px-4 py-2 bg-gray-900 text-blue-300">To</th>
+          <th class="w-1/8 border px-4 py-2 bg-gray-900 text-blue-300">Subject</th>
+          <th class="w-1/2 border px-4 py-2 bg-gray-900 text-blue-300">Content</th>
         </tr>
       </thead>
       <tbody>

@@ -29,8 +29,8 @@ export default {
       return highlightedContent;
     },
     escapeHtml(text) {
-    return text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  },
+      return text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    },
   },
 };
 </script>

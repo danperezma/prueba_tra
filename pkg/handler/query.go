@@ -1,4 +1,4 @@
-// // pkg/handler/query
+// pkg/handler/query
 package handler
 
 import (
@@ -8,10 +8,9 @@ import (
 	"back_go/pkg/zincsearch"
 	"encoding/json"
 	"net/http"
-	// "log"
-	// "io/ioutil"
 	"bytes"
 	"strings"
+	"log"
 )
 
 var max_results = 100
@@ -51,15 +50,14 @@ func parseEmail(emailText string) (*Email, error) {
 
 // Construct the request and perform the petition
 func SearchDocuments(query string) ([]Email, error) {
-	fmt.Println(query)
+	// fmt.Println(query)
 	LoadEnv()
 	url := os.Getenv("ZINC_HOST") + ":" + os.Getenv("ZINC_PORT") + "/api/" + index + "/_search"
 
 	now := time.Now()
 
-	// Implementa la función para filtrar por tiempo --------------
-	startTime := now.AddDate(0, -7, -7).Format("2006-01-02T15:04:05Z")
-	endTime := now.Format("2006-01-02T15:04:05Z")
+	startTime := now.AddDate(-1, 0, 0).Format("2006-01-02T15:04:05Z")
+	endTime := now.AddDate(0,0,+1).Format("2006-01-02T15:04:05Z")
 
 	request := zincsearch.SearchDocumentsRequest{
 		SearchType: search_type,
@@ -73,14 +71,14 @@ func SearchDocuments(query string) ([]Email, error) {
 
 	jsonData, err := json.MarshalIndent(request, "", "   ")
 	if err != nil {
-		return nil, fmt.Errorf("Error al convertir a JSON: %v", err)
+		return nil, fmt.Errorf("Error converting to JSON: %v", err)
 	}
 
-	fmt.Println(string(jsonData))
+	// fmt.Println(string(jsonData))
 	
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
 	if err != nil {
-		return nil, fmt.Errorf("Error al leer la solicitud: %v", err)
+		return nil, fmt.Errorf("Error reading the request: %v", err)
 	}
 	
 	req.SetBasicAuth(os.Getenv("ZINC_ADMIN_USER"), os.Getenv("ZINC_ADMIN_PASSWORD"))
@@ -89,29 +87,24 @@ func SearchDocuments(query string) ([]Email, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("Error al realizar la solicitud HTTP: %v", err)
+		return nil, fmt.Errorf("Error performing HTTP request: %v", err)
 	}
-	
 	defer resp.Body.Close()
 	
 	var searchResponse zincsearch.SearchDocumentsResponse
-	fmt.Println(searchResponse)
 	err = json.NewDecoder(resp.Body).Decode(&searchResponse)
 	if err != nil {
-		return nil, fmt.Errorf("Error al decodificar la respuesta JSON: %v", err)
+		return nil, fmt.Errorf("Error decoding JSON response: %v", err)
 	}
 
 	var result []Email
-
 	for _, value := range searchResponse.Hits.Hits {
-		parsedEmail, err := parseEmail(fmt.Sprint(value.Source["contenido"]))
+		parsedEmail, err := parseEmail(fmt.Sprint(value.Source["email_content"]))
 		if err != nil {
-			// Manejar el error de parseo de alguna manera si es necesario
-			fmt.Printf("Error al analizar el correo: %v\n", err)
-			continue // Omitir este correo y continuar con el siguiente
+			log.Printf("Error parsing email: %v\n", err)
+			continue
 		}
-		result = append(result, *parsedEmail) // Agregar el Email al slice result
+		result = append(result, *parsedEmail)
 	}
-
 	return result, nil
 }
