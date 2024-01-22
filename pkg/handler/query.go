@@ -73,8 +73,6 @@ func SearchDocuments(query string) ([]Email, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Error converting to JSON: %v", err)
 	}
-
-	// fmt.Println(string(jsonData))
 	
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
 	if err != nil {

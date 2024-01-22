@@ -21,7 +21,7 @@ var inserted int = 0
 var emailbig int = 0
 var rejected int = 0
 var Emails []map[string]interface{}
-var index string = "FinalTest"
+var index string = "indexerEnron"
 var max_size int64 = 1800
 var wg sync.WaitGroup
 
@@ -115,7 +115,7 @@ func Index() {
 		if err != nil {
 			log.Println("Could not create CPU profile:", err)
 		}
-		defer f.Close() // error handling omitted for example
+		defer f.Close() 
 		if err := pprof.StartCPUProfile(f); err != nil {
 			log.Println("Could not start CPU profile:", err)
 		}
@@ -153,7 +153,7 @@ func Index() {
 		if err != nil {
 			log.Println("Could not create memory profile:", err)
 		}
-		defer f.Close() // error handling omitted for example
+		defer f.Close() 
 		runtime.GC()    // get up-to-date statistics
 		if err := pprof.WriteHeapProfile(f); err != nil {
 			log.Println("Could not write memory profile:", err)

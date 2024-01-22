@@ -23,7 +23,6 @@ func HandlerPostQuery(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Decode the JSON body into a generic map
 	var data map[string]interface{}
 	if err := json.Unmarshal(body, &data); err != nil {
 		http.Error(w, "Error decoding JSON from the body", http.StatusBadRequest)
@@ -50,7 +49,6 @@ func HandlerPostQuery(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Write the JSON response to the HTTP response
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonResponse)
 }

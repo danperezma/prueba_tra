@@ -1,12 +1,10 @@
 package zincsearch
 
-// CreateDocumentsResponse is the response for the CreateDocuments function
 type CreateDocumentsResponse struct {
 	Message     string `json:"message"`
 	RecordCount int    `json:"record_count"`
 }
 
-// SearchDocumentsResponse is the response for the SearchDocuments function
 type SearchDocumentsResponse struct {
 	Hits struct {
 		Hits []struct {
