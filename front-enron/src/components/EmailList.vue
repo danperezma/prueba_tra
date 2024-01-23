@@ -34,6 +34,8 @@
   </div>
 </template>
 
+import { watch } from 'vue';
+
 <script>
 export default {
   props: {
@@ -78,6 +80,11 @@ export default {
       const startIndex = (this.currentPage - 1) * 10;
       const endIndex = startIndex + 10;
       return this.emails.slice(startIndex, endIndex);
+    },
+  },
+  watch: {
+    emails: function() {
+      this.currentPage = 1;
     },
   },
 };
