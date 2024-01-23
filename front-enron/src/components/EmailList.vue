@@ -6,6 +6,7 @@
           <th class="w-1/8 border px-4 py-2 bg-gray-900 text-blue-300">From</th>
           <th class="w-1/8 border px-4 py-2 bg-gray-900 text-blue-300">To</th>
           <th class="w-1/8 border px-4 py-2 bg-gray-900 text-blue-300">Subject</th>
+          <th class="w-1/8 border px-4 py-2 bg-gray-900 text-blue-300">Date</th>
           <th class="w-1/2 border px-4 py-2 bg-gray-900 text-blue-300">Content</th>
         </tr>
       </thead>
@@ -20,6 +21,7 @@
           <td class="border px-4 py-2">{{ truncateText(email.from, 15) }}</td>
           <td class="border px-4 py-2">{{ truncateText(email.to, 15) }}</td>
           <td class="border px-4 py-2">{{ truncateText(email.subject, 15) }}</td>
+          <td class="border px-4 py-2">{{ email.date }}</td>
           <td class="border px-4 py-2 overflow-wrap ">{{ truncateText(email.content, 150) }}</td>
         </tr>
       </tbody>

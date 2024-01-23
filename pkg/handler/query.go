@@ -20,6 +20,7 @@ type Email struct {
     From    string `json:"from"`
     To      string `json:"to"`
     Subject string `json:"subject"`
+    Date string `json:"date"`
     Content string `json:"content"`
     FullFile    string `json:"full_file"`
 }
@@ -37,7 +38,9 @@ func parseEmail(emailText string) (*Email, error) {
             email.To = strings.TrimSpace(strings.TrimPrefix(line, "To:"))
         } else if strings.HasPrefix(line, "Subject:") && email.Subject == "" {
             email.Subject = strings.TrimSpace(strings.TrimPrefix(line, "Subject:"))
-        } else if line == "" && !bodyStarted {
+        }else if strings.HasPrefix(line, "Date:") && email.Date == "" {
+            email.Date = strings.TrimSpace(strings.TrimPrefix(line, "Date:"))
+		} else if line == "" && !bodyStarted {
             bodyStarted = true
         } else if bodyStarted {
             email.Content += line + "\n"

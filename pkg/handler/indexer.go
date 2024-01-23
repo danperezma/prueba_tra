@@ -9,12 +9,15 @@ import (
 	"encoding/json"
 	"net/http"
 	"io/ioutil"
+	"io"
 	"bytes"
 	"flag"
 	"runtime/pprof"
 	"runtime"
 	"time"
 	"sync"
+	"net/mail"
+	// "strings"
 )
 
 var inserted int = 0
@@ -75,8 +78,25 @@ func addMail(path string, resultCh chan<- error) {
 		return
 	}
 
+	m, err := mail.ReadMessage(bytes.NewReader(content_file))
+	if err != nil {
+		log.Println("Error while reading the header",err)
+		return
+	}
+	header := m.Header
+
+	body, err := io.ReadAll(m.Body)
+	if err != nil {
+		log.Println("Error while reading the body",err)
+	}
+
 	data := map[string]interface{}{
-		"email_content": string(content_file),
+		"Date": header.Get("Date"),
+		"From": header.Get("From"),
+		"To": header.Get("To"),
+		"Subject": header.Get("Subject"),
+		"body": body,
+		"email_content" : string(content_file),
 	}
 
 	Emails = append(Emails, data)
